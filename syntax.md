@@ -1,6 +1,6 @@
 <Program>  -> [<Instruction>]
 
-<Instruction> -> 
+# <Instruction> -> 
     <Vide>
 OU
     [<Insruction>]
@@ -13,10 +13,10 @@ OU
         [<Instruction>]
     fin
 OU
-si <Expr_bool> alors 
-    <Instruction> 
-sinon 
-    <Instruction>
+    si <Expr_bool> alors 
+        <Instruction> 
+    sinon 
+        <Instruction>
 OU
     tantque <Expr_bool> faire 
         <Instruction>
@@ -25,11 +25,36 @@ OU
         <Instruction>
 OU
     répéter <Expr_int> fois
-        <Instructiona>
+        <Instruction>
     
+
+# <Fonction> ->
+    fonction <Nom>([<Nom>:<Type>]) [<Type>]
+    debut
+        [<Instruction>]
+    fin
+
+# <Expression> ->
+    <Nom>
+OU
+    <Nom>\[<Expression>\]
+OU
+    <Nom>\[<Expression>\]\[<Expression>\]
+OU
+    <Nom>([<Expression>])
+OU
+    <Nom> 
     
-Fonction ->
-fonction Nom([Nom:Type]) [Type]
-debut
-    [Instruction]
-fin
+
+# <Operateur> ->
+    +
+OU
+    -
+OU
+    *
+OU 
+    /
+OU
+    %
+OU
+    =
