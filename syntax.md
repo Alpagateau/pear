@@ -1,3 +1,20 @@
+Possible keyworkds :
+    - fonction
+    - retourner
+    - debut
+    - fin
+    - si 
+    - alors
+    - sinon
+    - tantque
+    - faire
+    - pour
+    - de
+    - à
+    - répéter
+    - fois
+    
+
 <Program>  -> [<Instruction>]
 
 # <Instruction> -> 
