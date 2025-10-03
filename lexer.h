@@ -30,6 +30,18 @@ enum lexem_types
   //literals
   lit_num, 
   lit_identifier,
+  //operators
+  op_binary,
+  op_unary,
+  op_expr,
+  //separatos 
+  sep_semicol,
+  sep_coma,
+  sep_ws,
+  sep_openbra,
+  sep_closebra,
+  sep_opensq,
+  sep_closeq
 };
 
 struct lexem
@@ -39,8 +51,25 @@ struct lexem
   int char_num;
   union var {
     int int_value;
+    char op_type;
     char identifier[STRING_SIZE];
   };
 };
 
+typedef struct lexer lexer_t;
+
+struct lexer 
+{
+  FILE* file;
+  int position;
+};
+
+//Consumes a character from the file stream
+//  -> returns the char read (0-255)
+//  -> returns 257 if eof
+int consume_char(lexer_t *lexer);
+int peek_char(lexer_t *lexer);
+
 bool lex_file(char* filepath, bool verbose);
+
+
