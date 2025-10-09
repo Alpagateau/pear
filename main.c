@@ -1,6 +1,7 @@
 #include <string.h>
 #include <stdio.h>
 #include "pear.h"
+#include "lexer.h"
 
 int main(int argc, char **argv)
 {
@@ -28,21 +29,28 @@ int main(int argc, char **argv)
     }
     else 
     {
-      ll_append(&args, argv[i]);
+      ll_string_append(&args, argv[i]);
     }
   }
 
-  if(cf.verbose)
+  int size = ll_string_size(&args);
+  char buf[STRING_SIZE] = {0};
+  printf("Read %d arguments\n", size);
+  for(int i = 0; i < size; i++)
   {
-    int size = ll_size(&args);
-    char buf[STRING_SIZE] = {0};
-    printf("Read %d arguments\n", size);
-    for(int i = 0; i < size; i++)
+    ll_string_cpyat(&args, i, buf);
+    bool a = is_pear_file(buf);
+    if(cf.verbose){
+      printf("Parsed arg %d : %s | Is a pear file ? %d\n", i, buf, a);
+    }
+    if(a)
     {
-      ll_cpyat(&args, i, buf);
-      printf("Parsed arg %d : %s | Is a pear file ? %d\n", i, buf, is_pear_file(buf));
+      lexem_ll_t l = {0};
+      lex_file(buf, &l, cf.verbose);
     }
   }
+
+  
 
   return 0;
 }
