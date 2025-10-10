@@ -49,8 +49,5 @@ int main(int argc, char **argv)
       lex_file(buf, &l, cf.verbose);
     }
   }
-
-  
-
   return 0;
 }

@@ -79,7 +79,9 @@ typedef struct lexer lexer_t;
 struct lexer 
 {
   FILE* file;
-  int position;
+  int stream_position;
+  int line_number;
+  int char_number;
 };
 
 //Consumes a character from the file stream
@@ -89,6 +91,7 @@ int consume_char(lexer_t *lexer);
 int peek_char(lexer_t *lexer);
 bool lex_file(char* filepath, lexem_ll_t *lexems, bool verbose);
 bool read_function(lexer_t *lexer);
+bool read_whitespaces(lexer_t *lexer);
 bool read_whitespace(lexer_t *lexer);
 bool read_identifier(lexer_t *lexer);
 

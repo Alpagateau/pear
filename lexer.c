@@ -11,12 +11,14 @@ bool lex_file(char* filepath, lexem_ll_t *lexems, bool verbose)
   }
   lexer_t lexer = {
     .file = f,
-    .position = 0
+    .stream_position = 0,
+    .line_number = 0,
+    .char_number = 0
   };
   if(verbose)
   {
     printf("Lexing file : %s\n", filepath);
-    printf("Is first lexem a space ? %d\n", read_whitespace(&lexer));
+    printf("Is first lexem a space ? %d\n", read_whitespaces(&lexer));
   }
    
   return true;
@@ -24,14 +26,21 @@ bool lex_file(char* filepath, lexem_ll_t *lexems, bool verbose)
 
 int consume_char(lexer_t *lexer)
 {
-  int c = getc(lexer->file);
-  fseek(lexer->file, 1, SEEK_CUR);
+  int c = fgetc(lexer->file);
+  if(c == '\n')
+  {
+    lexer->char_number = 0;
+    lexer->line_number++;
+  }
+  lexer->stream_position++;
   return c;
 }
 
 int peek_char(lexer_t *lexer)
 {
-  int c = fgetc(lexer->file);
+  int c;
+  c = fgetc(lexer->file);
+  ungetc(c, lexer->file);
   return c;
 }
 
@@ -106,36 +115,39 @@ bool read_function(lexer_t *lexer)
   return true;
 }
 
+
+
+bool read_whitespaces(lexer_t *lexer)
+{
+  bool done = false;
+  int count = 0;
+  do 
+  {
+    done = read_whitespace(lexer);
+    if(done)
+      count++;
+  }
+  while(done);
+  return (count > 0);
+}
+
 bool read_whitespace(lexer_t *lexer)
 {
   int peeked = peek_char(lexer);
   if(peeked > 255)
     return false;
   
-  char c = (unsigned char)(peeked & 0xFF);
-  bool any = false;
-  bool many = false;
-  do{
-    switch(c)
+  char c = (char)peeked;
+  static char whitespaces[] = {'\n', ' ', '\t', '\r'};
+
+  for(char i = 0; i < 4; i++)
+  {
+    if(c == whitespaces[i])
     {
-      case ' ':
-      case '\n':
-      case '\t':
-      case '\v':
-      case '\r':
-        many = true;
-        any = true;
-        consume_char(lexer);
-        c = (unsigned char)(peeked & 0xFF); 
-        printf("Got a whitespace : %d\n", c);
-        break;
-      default: 
-        many = false; 
-        printf("Not a whitespace : %d\n", c);
-        break;
+      consume_char(lexer);
+      return true;
     }
-  }while(many);
-  return any;
+  }
 }
 
 bool read_identifier(lexer_t *lexer)
