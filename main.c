@@ -14,7 +14,7 @@ int main(int argc, char **argv)
     return 0;
   }
  
-  string_ll_t args = {0};
+  struct da_string_t args = {0};
 
   //Read the compile flags
   for(int i = 1; i < argc; i++)
@@ -29,16 +29,18 @@ int main(int argc, char **argv)
     }
     else 
     {
-      ll_string_append(&args, argv[i]);
+      struct string a;
+      strcpy(a.value, argv[i]);
+      da_string_t_append(&args, a);
     }
   }
 
-  int size = ll_string_size(&args);
+  int size = args.len;
   char buf[STRING_SIZE] = {0};
   printf("Read %d arguments\n", size);
   for(int i = 0; i < size; i++)
   {
-    ll_string_cpyat(&args, i, buf);
+    strcpy(buf, args.values[i].value);
     bool a = is_pear_file(buf);
     if(cf.verbose){
       printf("Parsed arg %d : %s | Is a pear file ? %d\n", i, buf, a);

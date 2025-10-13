@@ -4,7 +4,7 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <string.h>
-
+#include "dynamic_array.h"
 #define VERSION "0.0.1"
 #define STRING_SIZE 255
 
@@ -13,24 +13,13 @@ typedef struct {
   bool out_c;
 }compile_flags_t;
 
-typedef struct string_ll string_ll_t;
+typedef struct string string_t;
 
-struct string_ll{ 
+struct string{ 
   char value[STRING_SIZE];
-  bool is_written;
-  string_ll_t *next;
 };
 
-int ll_string_append(string_ll_t *root, char *val);
-
-int ll_string_pop(string_ll_t *root, char* out);
-
-int ll_string_size(string_ll_t *root);
-
-int ll_string_cpyat(string_ll_t *root, unsigned int index, char* buffer);
-
-
-char* ll_string_getat(string_ll_t *root, unsigned int index, int* size_out);
+GENERATE_DA_PRO(string_t)
 
 bool is_pear_file(char* filename);
 

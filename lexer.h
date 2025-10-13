@@ -14,7 +14,8 @@ typedef struct lexem lexem_t;
 
 enum lexem_types 
 {
-  db_null     ,
+  db_null = 0 ,
+  db_error    ,
   kw_fonction ,
   kw_retourner,
   kw_debut    ,
@@ -47,7 +48,9 @@ enum lexem_types
   sep_openbra ,
   sep_closebra,
   sep_opensq  ,
-  sep_closeq
+  sep_closesq ,
+  sep_openpar ,
+  sep_closepar
 };
 
 struct lexem
@@ -62,18 +65,7 @@ struct lexem
   };
 };
 
-typedef struct lexem_ll lexem_ll_t;
-struct lexem_ll
-{
-  lexem_t lexem;
-  int is_written;
-  lexem_ll_t *next; 
-};
-
-int ll_lexem_append(lexem_ll_t *root, lexem_t value);
-int ll_lexem_pop(lexem_ll_t *root, lexem_t *value);
-lexem_t ll_lexem_getat(lexem_ll_t *root, unsigned int index);
-
+GENERATE_DA_PRO(lexem_t)
 
 typedef struct lexer lexer_t;
 struct lexer 
@@ -87,12 +79,19 @@ struct lexer
 //Consumes a character from the file stream
 //  -> returns the char read (0-255)
 //  -> returns 257 if eof
+bool is_alpha(char c);
+bool is_alphanum(char c);
+bool is_num(char c);
+
 int consume_char(lexer_t *lexer);
 int peek_char(lexer_t *lexer);
-bool lex_file(char* filepath, lexem_ll_t *lexems, bool verbose);
-bool read_function(lexer_t *lexer);
-bool read_whitespaces(lexer_t *lexer);
-bool read_whitespace(lexer_t *lexer);
-bool read_identifier(lexer_t *lexer);
+bool lex_file(char* filepath, da_lexem_t *lexems, bool verbose);
 
+lexem_t read_function(lexer_t *lexer);
+lexem_t read_whitespaces(lexer_t *lexer);
+lexem_t read_identifier(lexer_t *lexer);
+lexem_t read_parenthesis(lexer_t *lexer);
+
+void print_lexem(lexem_t *lexem);
+bool read_whitespace(lexer_t *lexer);
 #endif

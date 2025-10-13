@@ -1,6 +1,10 @@
 #include "lexer.h"
+#include "pear.h"
+#include <stdio.h>
 
-bool lex_file(char* filepath, lexem_ll_t *lexems, bool verbose)
+GENERATE_DA_IMP(lexem_t)
+
+bool lex_file(char* filepath, da_lexem_t *lexems, bool verbose)
 {
   FILE* f = fopen(filepath, "r");
   if(f == NULL)
@@ -15,12 +19,17 @@ bool lex_file(char* filepath, lexem_ll_t *lexems, bool verbose)
     .line_number = 0,
     .char_number = 0
   };
-  if(verbose)
-  {
-    printf("Lexing file : %s\n", filepath);
-    printf("Is first lexem a space ? %d\n", read_whitespaces(&lexer));
-  }
-   
+
+  printf("Lexing file : %s\n", filepath);
+  while(!feof(lexer.file) ){
+    lexem_t l = read_whitespaces(&lexer);
+    if(l.type == db_null)
+      l = read_identifier(&lexer); 
+    if(l.type == db_null)
+      l =  read_parenthesis(&lexer);
+    if(l.type != db_null)
+      print_lexem(&l);
+  } 
   return true;
 }
 
@@ -44,91 +53,30 @@ int peek_char(lexer_t *lexer)
   return c;
 }
 
-int ll_lexem_append(lexem_ll_t *root, lexem_t val)
+lexem_t read_function(lexer_t *lexer)
 {
-  if(root->next != NULL)
-    ll_lexem_append(root->next, val);
-  else 
-  {
-    if(root->is_written != 0)
-    {
-      root->next = (lexem_ll_t*)malloc(sizeof(lexem_ll_t));
-      if(root->next == NULL)
-      {
-        return 1;
-      }
-      root->next->is_written = 1;
-      root->next->lexem = val;
-    }
-    else 
-    {
-      root->lexem = val;
-      root->is_written = 1; 
-    }
-  }
-  return 0;
+  lexem_t lex = {};
+  
+  return lex;
 }
 
-int ll_lexem_pop(lexem_ll_t *root, lexem_t *out)
-{
-  if(root->next->next == NULL)
-  {
-    if((void*)out != NULL)
-      *out = (root->next->lexem);
-    *(root->next) = (lexem_ll_t){0};
-    free((root->next));
-    root->next = NULL;
-  }
-  return 0;
-}
-
-int ll_lexem_size(lexem_ll_t *root)
-{
-  if(root->next == NULL)
-    return 1;
-  else 
-    return 1 + ll_lexem_size(root->next);
-}
-
-lexem_t ll_lexem_getat(lexem_ll_t *root, unsigned int index)
-{
-  if(index == 0)
-  {
-    //*size_out = STRING_SIZE;
-    return (root->lexem);
-  }
-  else 
-  {
-    if(root->next == NULL)
-    {
-      return (lexem_t){0};
-    }
-    else { 
-      return ll_lexem_getat(root->next, index-1);
-    }
-  }
-  return (lexem_t){0};
-}
-
-bool read_function(lexer_t *lexer)
-{
-  return true;
-}
-
-
-
-bool read_whitespaces(lexer_t *lexer)
+lexem_t read_whitespaces(lexer_t *lexer)
 {
   bool done = false;
-  int count = 0;
+  int count = -1;
   do 
   {
+    count++;
     done = read_whitespace(lexer);
-    if(done)
-      count++;
   }
   while(done);
-  return (count > 0);
+  lexem_t lex = (lexem_t){
+    .type = sep_ws, 
+    .char_num = lexer->char_number, 
+    .line_num = lexer->line_number,
+    .identifier = {0}
+  };
+  return (count > 0) ? lex : (lexem_t){.type = db_null};
 }
 
 bool read_whitespace(lexer_t *lexer)
@@ -148,9 +96,93 @@ bool read_whitespace(lexer_t *lexer)
       return true;
     }
   }
+  return false;
 }
 
-bool read_identifier(lexer_t *lexer)
+lexem_t read_identifier(lexer_t *lexer)
 {
-  return true;
+  lexem_t lex = {0};
+  lex.char_num = lexer->char_number;
+  lex.line_num = lexer->line_number;
+  char c1 = (char)peek_char(lexer);
+  if(!is_alpha(c1))
+  {
+    lex.type = db_null;
+    printf("Is no alpha : %c\n", c1);
+  }
+  else 
+  {
+    char ident[STRING_SIZE] = {0};
+    int len = 0;
+    char c = consume_char(lexer);
+    while(is_alphanum(c))
+    {
+      ident[len] = c;
+      len++;
+      c = consume_char(lexer);
+    }
+
+    lex.type = lit_ident;
+    strcpy(lex.identifier, ident);
+  }
+  return lex;
+}
+
+bool is_alpha(char c)
+{
+  return ( c >= 'A') && ( c <= 'z') && ( c <= 'Z' || c >= 'a' );
+}
+
+bool is_num(char c)
+{
+  return (c >= '0') && (c <= '9');
+}
+
+bool is_alphanum(char c)
+{
+  return is_alpha(c) || is_num(c) || (c == '_');
+}
+
+void print_lexem(lexem_t *lexem)
+{
+  printf("< lexem #%d : %d; %d >\n", (int)lexem->type, lexem->line_num, lexem->char_num);
+}
+
+lexem_t read_parenthesis(lexer_t *lexer)
+{
+  lexem_t lex = {0};
+  lex.char_num = lexer->char_number;
+  lex.line_num = lexer->line_number;
+  char c = peek_char(lexer);
+  switch(c)
+  {
+    case '(':
+      consume_char(lexer);
+      lex.type = sep_openpar;
+      break;
+    case ')':
+      consume_char(lexer);
+      lex.type = sep_closepar;
+      break;
+    case '{':
+      consume_char(lexer);
+      lex.type = sep_openbra;
+      break;
+    case '}':
+      consume_char(lexer);
+      lex.type = sep_closebra;
+      break;
+    case '[':
+      consume_char(lexer);
+      lex.type = sep_opensq;
+      break;
+    case ']':
+      consume_char(lexer);
+      lex.type = sep_closesq;
+      break;
+    default: 
+      lex.type = db_null;
+      break;
+  }
+  return lex;
 }
