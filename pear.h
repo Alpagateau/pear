@@ -5,7 +5,8 @@
 #include <stdbool.h>
 #include <string.h>
 #include "dynamic_array.h"
-#define VERSION "0.0.1"
+
+#define VERSION "0.0.2"
 #define STRING_SIZE 255
 
 typedef struct {

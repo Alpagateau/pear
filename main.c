@@ -47,8 +47,12 @@ int main(int argc, char **argv)
     }
     if(a)
     {
-      lexem_ll_t l = {0};
+      struct da_lexem_t l = {0};
       lex_file(buf, &l, cf.verbose);
+      for(int i = 0; i < l.len; i++)
+      {
+        print_lexem(l.values[i]);
+      }
     }
   }
   return 0;

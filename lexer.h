@@ -28,7 +28,7 @@ enum lexem_types
   kw_pour     ,
   kw_de       ,
   kw_a        ,
-  kw_répéter  ,
+  kw_repeter  ,
   kw_fois     ,
   //types
   kw_entier   ,
@@ -58,6 +58,8 @@ struct lexem
   enum lexem_types type;
   int line_num;
   int char_num;
+  int debut;
+  int fin;
   union {
     int int_value;
     char op_type;
@@ -79,19 +81,17 @@ struct lexer
 //Consumes a character from the file stream
 //  -> returns the char read (0-255)
 //  -> returns 257 if eof
-bool is_alpha(char c);
-bool is_alphanum(char c);
-bool is_num(char c);
-
 int consume_char(lexer_t *lexer);
 int peek_char(lexer_t *lexer);
-bool lex_file(char* filepath, da_lexem_t *lexems, bool verbose);
+void peek_str(lexer_t *lexer, 
+              char buffer[], 
+              int len);
+bool lex_file(
+  char* filepath, 
+  struct da_lexem_t *lexems, 
+  bool verbose);
 
-lexem_t read_function(lexer_t *lexer);
-lexem_t read_whitespaces(lexer_t *lexer);
-lexem_t read_identifier(lexer_t *lexer);
-lexem_t read_parenthesis(lexer_t *lexer);
+bool is_kw_return(lexer_t *lexer);
+void print_lexem(lexem_t l);
 
-void print_lexem(lexem_t *lexem);
-bool read_whitespace(lexer_t *lexer);
 #endif
